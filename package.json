@@ -5,6 +5,8 @@
   "dependencies": {
     "@expo/ui": "~57.0.13",
     "expo": "~57.0.16",
+    "expo-asset": "~57.0.14",
+    "expo-audio": "~57.0.4",
     "expo-constants": "~57.0.14",
     "expo-dev-client": "~57.0.15",
     "expo-device": "~57.0.1",
@@ -21,7 +23,10 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.2",
+    "react-native-enriched-markdown": "^0.4.1",
     "react-native-gesture-handler": "~2.32.0",
+    "react-native-nitro-modules": "^0.36.5",
+    "react-native-nobodywho": "^3.0.0",
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
@@ -40,7 +45,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit --pretty false | awk '/^[^[:space:]]/{skip=/node_modules/} !skip{print; c=1} END{exit c?1:0}'"
   },
   "private": true
 }

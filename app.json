@@ -33,7 +33,15 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone for speech-to-text."
+        }
+      ],
+      "expo-asset",
+      "react-native-enriched-markdown"
     ],
     "experiments": {
       "typedRoutes": true,
