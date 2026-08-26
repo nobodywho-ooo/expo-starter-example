@@ -8,14 +8,11 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 
 import { useColors } from '@/hooks';
 import { IconButton } from './icon-button';
 
 const INPUT_BAR_HEIGHT = 48;
-
-const LIQUID_GLASS_AVAILABLE = isLiquidGlassAvailable();
 
 const getBoxShadow = (shadowColor: string) => ({
   boxShadow: [
@@ -55,51 +52,36 @@ export function InputBar({
 }: InputBarProps) {
   const { colors } = useColors();
 
-  const inner = (
-    <>
-      <TextInput
-        style={[styles.textInput, { color: colors.onSurface }]}
-        placeholder="Ask something..."
-        placeholderTextColor="#999"
-        value={value}
-        onChangeText={onChangeText}
-        multiline
-      />
-      <View style={styles.actionsContainer}>
-        <SpeechToTextButton
-          isRecording={isRecording}
-          isTranscribing={isTranscribing}
-          onPress={onToggleSpeechToText}
-        />
-        <SendButton
-          isStreaming={isStreaming}
-          value={value}
-          onSend={onSend}
-          onStop={onStop}
-        />
-      </View>
-    </>
-  );
-
   return (
     <View style={[styles.inputBarOuter, style]}>
-      {LIQUID_GLASS_AVAILABLE ? (
-        <GlassView
-          glassEffectStyle="regular"
-          isInteractive
-          style={styles.inputBarInner}>
-          {inner}
-        </GlassView>
-      ) : (
         <View
           style={[
             styles.inputBarInner,
             getBoxShadow(colors.shadow),
             { backgroundColor: colors.surfaceSecondary },
           ]}>
-          {inner}
+        <TextInput
+          style={[styles.textInput, { color: colors.onSurface }]}
+          placeholder="Ask something..."
+          placeholderTextColor="#999"
+          value={value}
+          onChangeText={onChangeText}
+          multiline
+        />
+        <View style={styles.actionsContainer}>
+          <SpeechToTextButton
+            isRecording={isRecording}
+            isTranscribing={isTranscribing}
+            onPress={onToggleSpeechToText}
+          />
+          <SendButton
+            isStreaming={isStreaming}
+            value={value}
+            onSend={onSend}
+            onStop={onStop}
+          />
         </View>
-      )}
+      </View>
     </View>
   );
 }
@@ -183,11 +165,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   inputBarInner: {
-    borderRadius: 24,
+    borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 8,
     minHeight: INPUT_BAR_HEIGHT,
     overflow: 'hidden',
+    backgroundColor: 'rgb(226, 226, 226)'
   },
   actionsContainer: {
     paddingTop: 12,

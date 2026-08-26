@@ -28,24 +28,26 @@ In production, we recommend downloading models on demand — only when needed �
 
 #### Automated (Recommended)
 
-**Chat only**
-Minimal setup - fast inference, even on old/budget phone.
+**Minimal setup**
+Text generation only, fast inference, even on old/budget phone.
 
 | Platform      | Command                       |
 | ------------- | ----------------------------- |
 | macOS / Linux | `./scripts/download_chat.sh`  |
 | Windows       | `.\scripts\download_chat.ps1` |
 
-**All features**
-Chat + vision + hearing + embeddings + reranker
-Downloads Gemma 4, which runs well on flagship phone, but might not work or be slow on old/budget phone
+**Extra Setup**
+Adds the optional multimodal / RAG models. Each feature is a separate download grab only the ones you want to try.
 
-| Platform      | Command                                                                           |
-| ------------- | --------------------------------------------------------------------------------- |
-| macOS / Linux | `./scripts/download_chat_multimodal.sh && ./scripts/download_embedding_rerank.sh` |
-| Windows       | `.\scripts\download_chat_multimodal.ps1; .\scripts\download_embedding_rerank.ps1` |
+| Feature               | macOS / Linux                            | Windows                                   |
+| --------------------- | ---------------------------------------- | ----------------------------------------- |
+| Vision (images)       | `./scripts/download_chat_vision.sh`      | `.\scripts\download_chat_vision.ps1`      |
+| Hearing (audio)       | `./scripts/download_chat_audio.sh`       | `.\scripts\download_chat_audio.ps1`       |
+| Embeddings + reranker | `./scripts/download_embedding_rerank.sh` | `.\scripts\download_embedding_rerank.ps1` |
 
-The scripts download models from Hugging Face, rename them, and place them in the `assets/` folder.
+Vision uses a LFM2.5-VL model and Hearing uses a LFM2.5-Audio model.
+
+These scripts download models from Hugging Face, rename them, and place them in the `assets/` folder.
 
 ### 3. Run the App
 
@@ -62,35 +64,32 @@ npx expo run:ios
 `android/` folders. For iOS, if you have issues with metro, run `npm start` and
 then run the project on Xcode.
 
-### 4. How the models are loaded
+### How the models are loaded
 
 The download scripts in step 2 place GGUF files in the `assets/` folder:
 
-| Feature                 | File name                                                    |
-| ----------------------- | ------------------------------------------------------------ |
-| Chat / Vision / Hearing | `chat-model.gguf` (+ `projection-model.gguf` for multimodal) |
-| Embeddings              | `embedding-model.gguf`                                       |
-| RAG reranker            | `reranker-model.gguf`                                        |
+| Feature      | File name(s)                                              |
+| ------------ | --------------------------------------------------------- |
+| Chat         | `chat-model.gguf`                                         |
+| Vision       | `chat-vision-model.gguf` + `projection-vision-model.gguf` |
+| Hearing      | `chat-audio-model.gguf` + `projection-audio-model.gguf`   |
+| Embeddings   | `embedding-model.gguf`                                    |
+| RAG reranker | `reranker-model.gguf`                                     |
 
 `src/helpers/assets.ts` (`getAssetPath`) bundles whichever of these files exist
 using Metro's `require.context`, so a "chat only" setup does **not** need the
 other models present. `metro.config.js` registers `.gguf` as an asset type and
 enables `require.context`.
 
-> **After adding or removing a model, restart Metro with a cleared cache** so the
-> new `require.context` result is picked up:
->
-> ```sh
-> npx expo start --clear
-> ```
+**After adding or removing a model, restart Metro with a cleared cache** so the
+new `require.context` result is picked up:
 
-The Kokoro (TTS) and Whisper (STT) models are downloaded automatically from
-Hugging Face on first use via `hf://` sources — no manual step needed.
+```sh
+npx expo start --clear
+```
 
-> Prefer downloading the LLMs on demand instead of bundling them? `Chat.fromPath`
-> / `Encoder.fromPath` accept an `hf://owner/repo/file.gguf` or `https://` path
-> directly, so you can swap the `getAssetPath(...)` calls in
-> `src/services/ai-service.tsx` for a remote path.
+The Kokoro (TTS) and Whisper (STT) models are downloaded automatically from Hugging Face on first use via `hf://` sources (no manual step needed).
+You can also download chat / embeddingd / reranker models in that way
 
 #### Miscellaneous
 

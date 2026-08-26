@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { EnrichedMarkdownText } from 'react-native-enriched-markdown';
 import { Prompt } from 'react-native-nobodywho';
@@ -10,21 +11,24 @@ import { useColors, useTabBarBottomPadding, useThemeMode } from '@/hooks';
 import { AiModelState, useAiService } from '@/services';
 
 export default function VisionRoute() {
-  const { visionHearingChatState, createVisionHearingChat } = useAiService();
+  const { visionChatState, createVisionChat, disposeVisionChat } =
+    useAiService();
 
-  const initVisionChat = useCallback(async () => {
-    await createVisionHearingChat();
-  }, [createVisionHearingChat]);
+  // Load the model when this tab gains focus and free it when inactive
+  useFocusEffect(
+    useCallback(() => {
+      createVisionChat();
+      return () => {
+        disposeVisionChat();
+      };
+    }, [createVisionChat, disposeVisionChat]),
+  );
 
-  useEffect(() => {
-    initVisionChat();
-  }, [initVisionChat]);
-
-  switch (visionHearingChatState) {
+  switch (visionChatState) {
     case AiModelState.Ready:
       return <VisionScreen />;
     case AiModelState.Error:
-      return <ErrorView onRetry={initVisionChat} />;
+      return <ErrorView onRetry={createVisionChat} />;
     default:
       return <LoadingView />;
   }
@@ -34,7 +38,7 @@ function VisionScreen() {
   const { colors } = useColors();
   const { isDarkMode } = useThemeMode();
   const paddingBottom = useTabBarBottomPadding();
-  const { visionHearingChat } = useAiService();
+  const { visionChat } = useAiService();
   const [result, setResult] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
 
@@ -42,8 +46,11 @@ function VisionScreen() {
   // app.json) memoizes automatically, and hand-memoizing a closure over a ref's
   // `.current` trips the preserve-manual-memoization rule.
   const analyse = async () => {
-    const activeChat = visionHearingChat.current;
-    if (!activeChat) return;
+    const activeChat = visionChat.current;
+
+    if (!activeChat) {
+      return;
+    }
 
     setResult('');
     setIsStreaming(true);

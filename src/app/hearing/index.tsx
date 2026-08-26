@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { EnrichedMarkdownText } from 'react-native-enriched-markdown';
 import { Prompt } from 'react-native-nobodywho';
@@ -9,21 +10,24 @@ import { useColors, useTabBarBottomPadding, useThemeMode } from '@/hooks';
 import { AiModelState, useAiService } from '@/services';
 
 export default function HearingRoute() {
-  const { visionHearingChatState, createVisionHearingChat } = useAiService();
+  const { hearingChatState, createHearingChat, disposeHearingChat } =
+    useAiService();
 
-  const initHearingChat = useCallback(async () => {
-    await createVisionHearingChat();
-  }, [createVisionHearingChat]);
+  // Load the model when this tab gains focus and free it when inactive
+  useFocusEffect(
+    useCallback(() => {
+      createHearingChat();
+      return () => {
+        disposeHearingChat();
+      };
+    }, [createHearingChat, disposeHearingChat]),
+  );
 
-  useEffect(() => {
-    initHearingChat();
-  }, [initHearingChat]);
-
-  switch (visionHearingChatState) {
+  switch (hearingChatState) {
     case AiModelState.Ready:
       return <HearingScreen />;
     case AiModelState.Error:
-      return <ErrorView onRetry={initHearingChat} />;
+      return <ErrorView onRetry={createHearingChat} />;
     default:
       return <LoadingView />;
   }
@@ -33,15 +37,18 @@ function HearingScreen() {
   const { colors } = useColors();
   const { isDarkMode } = useThemeMode();
   const paddingBottom = useTabBarBottomPadding();
-  const { visionHearingChat } = useAiService();
+  const { hearingChat } = useAiService();
   const [result, setResult] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
 
   // Plain function on purpose — the React Compiler memoizes it, and manual
-  // memoization over `visionHearingChat.current` is rejected by the linter.
+  // memoization over `hearingChat.current` is rejected by the linter.
   const transcribe = async () => {
-    const activeChat = visionHearingChat.current;
-    if (!activeChat) return;
+    const activeChat = hearingChat.current;
+    
+    if (!activeChat) {
+      return;
+    }
 
     setResult('');
     setIsStreaming(true);

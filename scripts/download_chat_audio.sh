@@ -1,5 +1,5 @@
 #!/bin/bash
-# Download chat and projection models for macOS and Linux
+# Download audio chat + projection models (LFM2.5-Audio-1.5B) for macOS and Linux
 
 set -e
 
@@ -7,11 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ASSETS_DIR="$PROJECT_DIR/assets"
 
-CHAT_URL="https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q3_K_M.gguf"
-PROJECTION_URL="https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/mmproj-BF16.gguf"
+CHAT_URL="https://huggingface.co/LiquidAI/LFM2.5-Audio-1.5B-GGUF/resolve/main/LFM2.5-Audio-1.5B-Q4_0.gguf"
+PROJECTION_URL="https://huggingface.co/LiquidAI/LFM2.5-Audio-1.5B-GGUF/resolve/main/mmproj-LFM2.5-Audio-1.5B-Q4_0.gguf"
 
-CHAT_OUTPUT="$ASSETS_DIR/chat-model.gguf"
-PROJECTION_OUTPUT="$ASSETS_DIR/projection-model.gguf"
+CHAT_OUTPUT="$ASSETS_DIR/chat-audio-model.gguf"
+PROJECTION_OUTPUT="$ASSETS_DIR/projection-audio-model.gguf"
 
 mkdir -p "$ASSETS_DIR"
 
@@ -32,5 +32,5 @@ download() {
     echo "Done. $name saved to $output"
 }
 
-download "$CHAT_URL" "$CHAT_OUTPUT" "chat model"
-download "$PROJECTION_URL" "$PROJECTION_OUTPUT" "projection model"
+download "$CHAT_URL" "$CHAT_OUTPUT" "audio chat model"
+download "$PROJECTION_URL" "$PROJECTION_OUTPUT" "audio projection model"
