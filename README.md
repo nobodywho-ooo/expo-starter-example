@@ -85,7 +85,7 @@ enables `require.context`.
 new `require.context` result is picked up:
 
 ```sh
-npx expo start --clear
+npx expo start --clear # quit when the process is done
 ```
 
 The Kokoro (TTS) and Whisper (STT) models are downloaded automatically from Hugging Face on first use via `hf://` sources (no manual step needed).
@@ -93,10 +93,10 @@ You can also download chat / embeddingd / reranker models in that way
 
 #### Miscellaneous
 
-Cleanup
+Cleanup: native regeneration of `/ios` and `/android` folders.
 
 ```sh
-npm run reset-project
+expo prebuild --clean
 ```
 
 ---

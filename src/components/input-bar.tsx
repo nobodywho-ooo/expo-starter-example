@@ -12,7 +12,7 @@ import {
 import { useColors } from '@/hooks';
 import { IconButton } from './icon-button';
 
-const INPUT_BAR_HEIGHT = 48;
+const INPUT_BAR_HEIGHT = 98;
 
 const getBoxShadow = (shadowColor: string) => ({
   boxShadow: [

@@ -8,3 +8,4 @@ export { LoadingView } from './loading-view';
 export { MessageListItem } from './message-list-item';
 export { PlatformSymbol } from './platform-symbol';
 export { Text } from './text';
+export { ThinkingBlock } from './thinking-block';

@@ -3,10 +3,12 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { EnrichedMarkdownText } from 'react-native-enriched-markdown';
 import { Message } from 'react-native-nobodywho';
 
-import { getMarkdownStyle } from '@/helpers';
+import { getMarkdownStyle, parseThinking } from '@/helpers';
 import { useColors, useThemeMode } from '@/hooks';
 import { PlatformSymbol } from './platform-symbol';
+
 import { Text } from './text';
+import { ThinkingBlock } from './thinking-block';
 
 interface MessageListItemProps {
   message: Message;
@@ -36,6 +38,11 @@ function MessageListItemComponent({
     [isDarkMode, colors.onSurface],
   );
 
+  const { thinking, rest: markdownAnswer, isThinkingComplete } = useMemo(
+    () => parseThinking(content),
+    [content],
+  );
+
   if (role === 'user') {
     return (
       <View
@@ -49,19 +56,25 @@ function MessageListItemComponent({
   }
 
   const iconTtsColor = isStreaming ? colors.primaryDisabled : colors.primary;
-  const onToggleTts = () => (isPlaying ? onStop() : onPlay(index, content));
+  const onToggleTts = () => (isPlaying ? onStop() : onPlay(index, markdownAnswer));
+  const showThinking = thinking !== null || !isThinkingComplete;
 
   return (
     <>
-      <EnrichedMarkdownText
-        containerStyle={styles.assistantContainer}
-        markdown={content}
-        markdownStyle={markdownStyle}
-      />
+      {showThinking && (
+        <ThinkingBlock thinking={thinking} isComplete={isThinkingComplete} />
+      )}
+      {markdownAnswer !== '' && (
+        <EnrichedMarkdownText
+          containerStyle={styles.assistantContainer}
+          markdown={markdownAnswer}
+          markdownStyle={markdownStyle}
+        />
+      )}
       {isAudioLoading ? (
         <ActivityIndicator style={styles.activityIndicator} />
       ) : (
-        content !== '' && (
+        markdownAnswer !== '' && (
           <Pressable onPress={!isStreaming ? onToggleTts : undefined}>
             <PlatformSymbol
               ios={isPlaying ? 'stop.circle' : 'speaker.wave.3.fill'}

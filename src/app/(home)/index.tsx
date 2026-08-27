@@ -5,8 +5,14 @@ import {
   useRef,
   useState,
 } from 'react';
-import { FlatList, Keyboard, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Dimensions,
+  FlatList,
+  Keyboard,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { Message } from 'react-native-nobodywho';
 
 import {
@@ -16,7 +22,7 @@ import {
   LoadingView,
   MessageListItem,
 } from '@/components';
-import { isAndroid, isIOS } from '@/helpers';
+import { isIOS } from '@/helpers';
 import {
   useColors,
   useSttRecording,
@@ -25,7 +31,7 @@ import {
 } from '@/hooks';
 import { AiModelState, useAiService } from '@/services';
 
-const INPUT_BAR_BOTTOM_GAP = 14;
+const INPUT_BAR_BOTTOM_GAP = 10;
 
 /**
  * The Chat tab loads the chat model, then swaps between a loading, error, and
@@ -56,6 +62,7 @@ function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [keyboardOffset, setKeyboardOffset] = useState<number | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const { colors } = useColors();
   const { chat: currentChat } = useAiService();
@@ -70,7 +77,7 @@ function ChatScreen() {
     toggle: toggleSpeechToText,
   } = useSttRecording(appendTranscript);
   const flatListRef = useRef<FlatList>(null);
-  const insets = useSafeAreaInsets();
+  const containerRef = useRef<View>(null);
   const paddingBottom = useTabBarBottomPadding();
   const isKeyboardVisible = keyboardHeight > 0;
 
@@ -86,9 +93,23 @@ function ChatScreen() {
     const showEvent = isIOS ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = isIOS ? 'keyboardWillHide' : 'keyboardDidHide';
 
-    const showSub = Keyboard.addListener(showEvent, e =>
-      setKeyboardHeight(e.endCoordinates.height),
-    );
+    const showSub = Keyboard.addListener(showEvent, e => {
+      setKeyboardHeight(e.endCoordinates.height);
+
+      const windowHeight = Dimensions.get('window').height;
+      const keyboardTop =
+        e.endCoordinates.screenY || windowHeight - e.endCoordinates.height;
+
+      containerRef.current?.measureInWindow((_x, y, _width, height) => {
+        const containerBottom = y + height;
+        setKeyboardOffset(
+          Math.max(
+            containerBottom - keyboardTop + INPUT_BAR_BOTTOM_GAP,
+            INPUT_BAR_BOTTOM_GAP,
+          ),
+        );
+      });
+    });
     const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
 
     return () => {
@@ -135,9 +156,10 @@ function ChatScreen() {
     currentChat.current?.stopGeneration();
   };
 
-  const bottomOffset = isKeyboardVisible
-    ? keyboardHeight + (isAndroid ? insets.bottom : 0) + INPUT_BAR_BOTTOM_GAP
-    : paddingBottom + INPUT_BAR_BOTTOM_GAP;
+  const bottomOffset =
+    isKeyboardVisible && keyboardOffset != null
+      ? keyboardOffset
+      : paddingBottom + INPUT_BAR_BOTTOM_GAP;
   const footerHeight =
     paddingBottom + INPUT_BAR_BOTTOM_GAP * 2 + InputBar.height;
 
@@ -167,9 +189,13 @@ function ChatScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <View
+      ref={containerRef}
+      style={[styles.container, { backgroundColor: colors.surface }]}>
       {messages.length === 0 ? (
-        !isKeyboardVisible && <EmptyChat />
+        <Pressable style={styles.emptyArea} onPress={Keyboard.dismiss}>
+          {!isKeyboardVisible && <EmptyChat />}
+        </Pressable>
       ) : (
         <FlatList
           ref={flatListRef}
@@ -181,6 +207,7 @@ function ChatScreen() {
           showsVerticalScrollIndicator={false}
           renderItem={renderItem}
           keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
         />
       )}
       <InputBar
@@ -202,6 +229,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  emptyArea: {
+    flex: 1,
   },
   listContainer: {
     flex: 1,
