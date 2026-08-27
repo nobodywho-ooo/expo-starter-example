@@ -26,13 +26,17 @@ export default function EmbeddingsScreen() {
   // `encoder.current` trips the preserve-manual-memoization lint rule.
   const runEmbeddings = async () => {
     const activeEncoder = encoder.current;
-    if (!activeEncoder) return;
+    if (!activeEncoder) {
+      return;
+    }
 
     setBestMatch('');
     setIsProcessing(true);
+
     try {
       // Pre-compute document embeddings
       const docEmbeddings: number[][] = [];
+
       for (const doc of documents) {
         docEmbeddings.push(await activeEncoder.encode(doc));
       }
@@ -43,6 +47,7 @@ export default function EmbeddingsScreen() {
       // Find the most relevant document
       let maxSimilarity = -1;
       let bestIdx = 0;
+
       for (let i = 0; i < docEmbeddings.length; i++) {
         const similarity = cosineSimilarity(queryEmbedding, docEmbeddings[i]);
         if (similarity > maxSimilarity) {
@@ -50,6 +55,7 @@ export default function EmbeddingsScreen() {
           bestIdx = i;
         }
       }
+      
       setBestMatch(documents[bestIdx]);
     } catch (error) {
       devLog('EmbeddingsScreen error', error);

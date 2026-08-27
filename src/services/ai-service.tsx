@@ -91,8 +91,6 @@ interface AiServiceContextValue extends AiServiceState {
   }) => Promise<void>;
   createTts: (opts?: Partial<TextToSpeechOptions>) => Promise<void>;
   createStt: (opts?: Partial<SpeechToTextOptions>) => Promise<void>;
-  // Free a single tab's model so the inactive tab does not keep a model in
-  // memory. Called from the Vision / Hearing screens on blur (see useFocusEffect).
   disposeVisionChat: () => void;
   disposeHearingChat: () => void;
   dispose: () => void;
@@ -118,8 +116,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [state, setState] = useState<AiServiceState>(initialState);
 
-  // Guard to prevent duplicate loading of the same model, e.g. if createChat is
-  // called twice quickly.
+  // Guard to prevent duplicate loading of the same model, e.g. if createChat is called twice quickly.
   const inFlight = useRef({
     chat: false,
     chatWithToolCalling: false,
@@ -147,9 +144,13 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       sampler?: SamplerConfig;
       contextSize?: number;
     }) => {
-      if (inFlight.current.chat || chatRef.current) return;
+      if (inFlight.current.chat || chatRef.current) {
+        return;
+      }
+
       inFlight.current.chat = true;
       setState(s => ({ ...s, chatState: AiModelState.Loading }));
+
       try {
         const modelPath = await getAssetPath(ModelName.ChatModel);
         const chat = await Chat.fromPath({
@@ -159,6 +160,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
           sampler: opts?.sampler,
           contextSize: opts?.contextSize,
         });
+
         chatRef.current = chat;
         setState(s => ({ ...s, chatState: AiModelState.Ready }));
       } catch (error) {
@@ -179,10 +181,13 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       sampler?: SamplerConfig;
       contextSize?: number;
     }) => {
-      if (inFlight.current.chatWithToolCalling || chatWithToolCallingRef.current)
+      if (inFlight.current.chatWithToolCalling || chatWithToolCallingRef.current){
         return;
+      }
+
       inFlight.current.chatWithToolCalling = true;
       setState(s => ({ ...s, chatWithToolCallingState: AiModelState.Loading }));
+
       try {
         const modelPath = await getAssetPath(ModelName.ChatModel);
         const chat = await Chat.fromPath({
@@ -193,7 +198,9 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
           sampler: opts?.sampler,
           contextSize: opts?.contextSize,
         });
+
         chatWithToolCallingRef.current = chat;
+
         setState(s => ({
           ...s,
           chatWithToolCallingState: AiModelState.Ready,
@@ -217,9 +224,13 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       systemPrompt?: string;
       contextSize?: number;
     }) => {
-      if (inFlight.current.visionChat || visionChatRef.current) return;
+      if (inFlight.current.visionChat || visionChatRef.current) {
+        return;
+      }
+
       inFlight.current.visionChat = true;
       setState(s => ({ ...s, visionChatState: AiModelState.Loading }));
+
       try {
         const modelPath = await getAssetPath(ModelName.ChatVisionModel);
         const projectionModelPath = await getAssetPath(
@@ -232,6 +243,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
           systemPrompt: opts?.systemPrompt,
           contextSize: opts?.contextSize,
         });
+
         visionChatRef.current = chat;
         setState(s => ({ ...s, visionChatState: AiModelState.Ready }));
       } catch (error) {
@@ -259,9 +271,13 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       systemPrompt?: string;
       contextSize?: number;
     }) => {
-      if (inFlight.current.hearingChat || hearingChatRef.current) return;
+      if (inFlight.current.hearingChat || hearingChatRef.current) {
+        return;
+      }
+
       inFlight.current.hearingChat = true;
       setState(s => ({ ...s, hearingChatState: AiModelState.Loading }));
+
       try {
         const modelPath = await getAssetPath(ModelName.ChatAudioModel);
         const projectionModelPath = await getAssetPath(
@@ -274,6 +290,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
           systemPrompt: opts?.systemPrompt,
           contextSize: opts?.contextSize,
         });
+
         hearingChatRef.current = chat;
         setState(s => ({ ...s, hearingChatState: AiModelState.Ready }));
       } catch (error) {
@@ -296,9 +313,13 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
   // Embeddings
   const createEncoder = useCallback(
     async (opts?: { useGpu?: boolean; contextSize?: number }) => {
-      if (inFlight.current.encoder || encoderRef.current) return;
+      if (inFlight.current.encoder || encoderRef.current) {
+        return;
+      }
+
       inFlight.current.encoder = true;
       setState(s => ({ ...s, encoderState: AiModelState.Loading }));
+
       try {
         const modelPath = await getAssetPath(ModelName.EmbeddingModel);
         const encoder = await Encoder.fromPath({
@@ -306,6 +327,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
           useGpu: opts?.useGpu ?? true,
           contextSize: opts?.contextSize,
         });
+
         encoderRef.current = encoder;
         setState(s => ({ ...s, encoderState: AiModelState.Ready }));
       } catch (error) {
@@ -321,9 +343,13 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
   // ReRanker
   const createCrossEncoder = useCallback(
     async (opts?: { useGpu?: boolean; contextSize?: number }) => {
-      if (inFlight.current.crossEncoder || crossEncoderRef.current) return;
+      if (inFlight.current.crossEncoder || crossEncoderRef.current) {
+        return;
+      }
+
       inFlight.current.crossEncoder = true;
       setState(s => ({ ...s, crossEncoderState: AiModelState.Loading }));
+
       try {
         const modelPath = await getAssetPath(ModelName.RerankerModel);
         const crossEncoder = await CrossEncoder.fromPath({
@@ -331,6 +357,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
           useGpu: opts?.useGpu ?? true,
           contextSize: opts?.contextSize,
         });
+
         crossEncoderRef.current = crossEncoder;
         setState(s => ({ ...s, crossEncoderState: AiModelState.Ready }));
       } catch (error) {
@@ -345,7 +372,9 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Text-to-speech
   const createTts = useCallback(async (opts?: Partial<TextToSpeechOptions>) => {
-    if (inFlight.current.tts || ttsRef.current) return;
+    if (inFlight.current.tts || ttsRef.current) {
+      return;
+    }
 
     inFlight.current.tts = true;
     setState(s => ({ ...s, ttsState: AiModelState.Loading }));
@@ -370,14 +399,18 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Speech-to-text
   const createStt = useCallback(async (opts?: Partial<SpeechToTextOptions>) => {
-    if (inFlight.current.stt || sttRef.current) return;
+    if (inFlight.current.stt || sttRef.current) {
+      return;
+    }
 
     inFlight.current.stt = true;
+
     try {
       const stt = await SpeechToText.load({
         source: 'hf://onnx-community/whisper-base',
         ...opts,
       });
+      
       sttRef.current = stt;
       setState(s => ({ ...s, sttState: AiModelState.Ready }));
     } catch (error) {

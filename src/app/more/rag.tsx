@@ -45,13 +45,17 @@ export default function RagScreen() {
   const runRag = async () => {
     const activeEncoder = encoder.current;
     const activeCrossEncoder = crossEncoder.current;
-    if (!activeEncoder || !activeCrossEncoder) return;
+    if (!activeEncoder || !activeCrossEncoder) {
+      return;
+    }
 
     setTopResults([]);
     setIsProcessing(true);
+
     try {
       // Pre-compute embeddings for all documents
       const docEmbeddings: number[][] = [];
+
       for (const doc of knowledgeBase) {
         docEmbeddings.push(await activeEncoder.encode(doc));
       }
@@ -59,12 +63,14 @@ export default function RagScreen() {
       // Stage 1: Fast filtering with embeddings
       const queryEmbedding = await activeEncoder.encode(query);
       const similarities: { doc: string; score: number }[] = [];
+
       for (let i = 0; i < knowledgeBase.length; i++) {
         similarities.push({
           doc: knowledgeBase[i],
           score: cosineSimilarity(queryEmbedding, docEmbeddings[i]),
         });
       }
+      
       similarities.sort((a, b) => b.score - a.score);
       const candidateDocs = similarities.slice(0, 20).map(s => s.doc);
 

@@ -1,9 +1,5 @@
-import { MarkdownStyle } from 'react-native-enriched-markdown';
+import { MarkdownStyle } from "react-native-enriched-markdown";
 
-/**
- * `react-native-enriched-markdown` renders with dark-friendly defaults already,
- * so we only override text colors when in dark mode.
- */
 export const getMarkdownStyle = (
   isDarkMode: boolean,
   color: string,
@@ -20,9 +16,9 @@ export const getMarkdownStyle = (
     strikethrough: { color },
     underline: { color },
     link: { color },
-    code: { color, backgroundColor: '#1E1E1E' },
+    code: { color, backgroundColor: "#1E1E1E" },
     codeBlock: { color },
-    blockquote: { color, backgroundColor: '#1E1E1E' },
+    blockquote: { color, backgroundColor: "#1E1E1E" },
     list: { color },
     math: { color },
     inlineMath: { color },

@@ -41,8 +41,6 @@ function HearingScreen() {
   const [result, setResult] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
 
-  // Plain function on purpose — the React Compiler memoizes it, and manual
-  // memoization over `hearingChat.current` is rejected by the linter.
   const transcribe = async () => {
     const activeChat = hearingChat.current;
     
@@ -52,13 +50,16 @@ function HearingScreen() {
 
     setResult('');
     setIsStreaming(true);
+
     try {
       const audioPath = await getAssetPath('audio.mp3');
       const prompt = new Prompt([
         Prompt.Text('Tell me what you hear in the audio. Transcribe'),
         Prompt.Audio(audioPath),
       ]);
+
       let accumulated = '';
+      
       for await (const token of activeChat.ask(prompt)) {
         accumulated += token;
         setResult(accumulated);

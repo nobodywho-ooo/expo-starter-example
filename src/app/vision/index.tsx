@@ -54,6 +54,7 @@ function VisionScreen() {
 
     setResult('');
     setIsStreaming(true);
+
     try {
       const image1Path = await getAssetPath('image-1.png');
       const image2Path = await getAssetPath('image-2.png');
@@ -63,7 +64,9 @@ function VisionScreen() {
         Prompt.Text('Also tell me what you see in the second image.'),
         Prompt.Image(image2Path),
       ]);
+
       let accumulated = '';
+      
       for await (const token of activeChat.ask(prompt)) {
         accumulated += token;
         setResult(accumulated);

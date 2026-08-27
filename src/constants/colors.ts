@@ -1,12 +1,5 @@
 import { Theme } from "@/types";
 
-/**
- * Color palette for the NobodyWho starter app.
- *
- * These mirror the design of the React Native starter — kept as a plain object
- * so screens/components can resolve colors through the `useColors` hook, which
- * reacts to Expo's `useColorScheme()`.
- */
 export const lightColors = {
   surface: "#FFFFFF",
   surfaceSecondary: "#FFFFFF",

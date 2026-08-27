@@ -29,14 +29,11 @@ import {
   useTabBarBottomPadding,
   useTtsPlayback,
 } from '@/hooks';
+
 import { AiModelState, useAiService } from '@/services';
 
 const INPUT_BAR_BOTTOM_GAP = 10;
 
-/**
- * The Chat tab loads the chat model, then swaps between a loading, error, and
- * ready state — mirroring how the React Navigation starter gated the stack.
- */
 export default function ChatRoute() {
   const { chatState, createChat } = useAiService();
 
@@ -120,10 +117,14 @@ function ChatScreen() {
 
   const handleSend = async () => {
     const userInput = inputText.trim();
-    if (!userInput || isStreaming) return;
+    if (!userInput || isStreaming) {
+      return;
+    }
 
     const chat = currentChat.current;
-    if (!chat) return;
+    if (!chat) {
+      return;
+    }
 
     const userMessage: Message = { role: 'user', content: userInput };
     const initialAssistantMessage: Message = { role: 'assistant', content: '' };
