@@ -81,11 +81,12 @@ using Metro's `require.context`, so a "chat only" setup does **not** need the
 other models present. `metro.config.js` registers `.gguf` as an asset type and
 enables `require.context`.
 
-**After adding or removing a model, restart Metro with a cleared cache** so the
-new `require.context` result is picked up:
+**After adding or removing a model, restart Metro with a cleared cache and clean native files**
 
 ```sh
 npx expo start --clear # quit when the process is done
+rm -rf android/app/build android/app/.cxx android/build # clean stale build artifacts for android
+rm -rf ios/build ~/Library/Developer/Xcode/DerivedData # clean for iOS
 ```
 
 The Kokoro (TTS) and Whisper (STT) models are downloaded automatically from Hugging Face on first use via `hf://` sources (no manual step needed).
