@@ -16,6 +16,8 @@ import {
   TextToSpeech,
   TextToSpeechOptions,
   Tool,
+  VoiceActivityDetection,
+  VoiceActivityDetectionOptions,
 } from 'react-native-nobodywho';
 
 import { devLog, getAssetPath } from '@/helpers';
@@ -46,6 +48,7 @@ interface AiServiceState {
   crossEncoderState: AiModelState;
   ttsState: AiModelState;
   sttState: AiModelState;
+  vadState: AiModelState;
 }
 
 interface AiServiceContextValue extends AiServiceState {
@@ -57,6 +60,7 @@ interface AiServiceContextValue extends AiServiceState {
   crossEncoder: React.RefObject<CrossEncoder | undefined>;
   tts: React.RefObject<TextToSpeech | undefined>;
   stt: React.RefObject<SpeechToText | undefined>;
+  vad: React.RefObject<VoiceActivityDetection | undefined>;
 
   createChat: (opts?: {
     useGpu?: boolean;
@@ -91,6 +95,7 @@ interface AiServiceContextValue extends AiServiceState {
   }) => Promise<void>;
   createTts: (opts?: Partial<TextToSpeechOptions>) => Promise<void>;
   createStt: (opts?: Partial<SpeechToTextOptions>) => Promise<void>;
+  createVad: (opts?: Partial<VoiceActivityDetectionOptions>) => Promise<void>;
   disposeVisionChat: () => void;
   disposeHearingChat: () => void;
   dispose: () => void;
@@ -109,6 +114,7 @@ const initialState: AiServiceState = {
   crossEncoderState: AiModelState.NotLoaded,
   ttsState: AiModelState.NotLoaded,
   sttState: AiModelState.NotLoaded,
+  vadState: AiModelState.NotLoaded,
 };
 
 export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -126,6 +132,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
     crossEncoder: false,
     tts: false,
     stt: false,
+    vad: false,
   });
 
   const chatRef = useRef<Chat | undefined>(undefined);
@@ -136,6 +143,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
   const crossEncoderRef = useRef<CrossEncoder | undefined>(undefined);
   const ttsRef = useRef<TextToSpeech | undefined>(undefined);
   const sttRef = useRef<SpeechToText | undefined>(undefined);
+  const vadRef = useRef<VoiceActivityDetection | undefined>(undefined);
 
   const createChat = useCallback(
     async (opts?: {
@@ -421,7 +429,37 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  const createVad = useCallback(
+    async (opts?: Partial<VoiceActivityDetectionOptions>) => {
+      if (inFlight.current.vad || vadRef.current) {
+        return;
+      }
+
+      inFlight.current.vad = true;
+      setState(s => ({ ...s, vadState: AiModelState.Loading }));
+
+      try {
+        const vad = await VoiceActivityDetection.load({
+          source: 'hf://onnx-community/silero-vad',
+          sampleRate: 16000,
+          ...opts,
+        });
+
+        vadRef.current = vad;
+        setState(s => ({ ...s, vadState: AiModelState.Ready }));
+      } catch (error) {
+        devLog('AiService error', error);
+        setState(s => ({ ...s, vadState: AiModelState.Error }));
+      } finally {
+        inFlight.current.vad = false;
+      }
+    },
+    [],
+  );
+
   const dispose = useCallback(() => {
+    vadRef.current?.destroy();
+    vadRef.current = undefined;
     sttRef.current = undefined;
     ttsRef.current = undefined;
     chatRef.current?.destroy();
@@ -445,6 +483,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
     inFlight.current.crossEncoder = false;
     inFlight.current.tts = false;
     inFlight.current.stt = false;
+    inFlight.current.vad = false;
 
     setState(initialState);
   }, []);
@@ -460,6 +499,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       crossEncoder: crossEncoderRef,
       tts: ttsRef,
       stt: sttRef,
+      vad: vadRef,
       createChat,
       createToolCallingChat,
       createVisionChat,
@@ -468,6 +508,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       createCrossEncoder,
       createTts,
       createStt,
+      createVad,
       disposeVisionChat,
       disposeHearingChat,
       dispose,
@@ -482,6 +523,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       createCrossEncoder,
       createTts,
       createStt,
+      createVad,
       disposeVisionChat,
       disposeHearingChat,
       dispose,
