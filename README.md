@@ -17,6 +17,7 @@ This starter app demonstrates the capabilities of **[NobodyWho](https://github.c
 - **Embeddings & RAG** — semantic search with an embedding model and cross-encoder reranker
 - **Speech to Text** — transcribe audio into text (STT)
 - **Text to Speech** — generate natural-sounding speech from text (TTS)
+- **Voice activity detection** - Detect speech in an audio stream to know when to start and stop listening
 
 ## 1. Getting Started
 
@@ -24,7 +25,7 @@ First, you will need to run `npm install` or `yarn` to install dependencies.
 
 ### 2. Download Models
 
-In production, we recommend downloading models on demand — only when needed — using a library like `@dr.pogodin/react-native-fs` for advanced options, or our built-in download method. This keeps your app size small. For development, the simplest approach is to download the models ahead of time and bundle them directly in your assets folder (see script below).
+In production, we recommend downloading models on demand — only when needed — using a library like `expo-file-system` for advanced options, or our built-in download method. This keeps your app size small. For development, the simplest approach is to download the models ahead of time and bundle them directly in your assets folder (see script below).
 
 #### Automated (Recommended)
 
