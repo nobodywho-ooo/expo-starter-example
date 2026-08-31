@@ -97,7 +97,7 @@ You can also download chat / embeddingd / reranker models in that way
 Cleanup: native regeneration of `/ios` and `/android` folders.
 
 ```sh
-expo prebuild --clean
+npx expo prebuild --clean
 ```
 
 ---
