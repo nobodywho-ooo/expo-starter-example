@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { EnrichedMarkdownText } from 'react-native-enriched-markdown';
 import { Message } from 'react-native-nobodywho';
 
-import { getMarkdownStyle, parseThinking } from '@/helpers';
+import { getContentText, getMarkdownStyle, parseThinking } from '@/helpers';
 import { useColors, useThemeMode } from '@/hooks';
 import { PlatformSymbol } from './platform-symbol';
 
@@ -29,7 +29,8 @@ function MessageListItemComponent({
   onPlay,
   onStop,
 }: MessageListItemProps) {
-  const { content, role } = message;
+  const { role } = message;
+  const content = getContentText(message.content);
   const { colors } = useColors();
   const { isDarkMode } = useThemeMode();
 

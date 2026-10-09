@@ -48,7 +48,17 @@
         }
       ],
       "expo-asset",
-      "react-native-enriched-markdown"
+      "react-native-enriched-markdown",
+      "expo-image",
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "enableSceneSupport": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
