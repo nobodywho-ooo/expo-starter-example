@@ -50,6 +50,14 @@ export default function MoreScreen() {
             }
             onPress={() => router.push('/more/rag')}
           />
+          <ListItem
+            title="Decision"
+            subtitle="Score predefined answers with a decision model"
+            iosIconName="checklist"
+            androidIconName="checklist"
+            iconBackgroundColor="#34C759"
+            onPress={() => router.push('/more/decision')}
+          />
         </>
       )}
     </ScrollView>

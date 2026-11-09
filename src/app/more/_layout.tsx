@@ -21,6 +21,7 @@ export default function MoreStackLayout() {
       />
       <Stack.Screen name="embeddings" options={{ title: 'Embeddings' }} />
       <Stack.Screen name="rag" options={{ title: 'RAG' }} />
+      <Stack.Screen name="decision" options={{ title: 'Decision' }} />
     </Stack>
   );
 }

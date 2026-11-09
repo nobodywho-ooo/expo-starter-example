@@ -9,6 +9,7 @@ import React, {
 import {
   Chat,
   CrossEncoder,
+  Decision,
   Encoder,
   SamplerConfig,
   SpeechToText,
@@ -46,6 +47,7 @@ interface AiServiceState {
   hearingChatState: AiModelState;
   encoderState: AiModelState;
   crossEncoderState: AiModelState;
+  decisionState: AiModelState;
   ttsState: AiModelState;
   sttState: AiModelState;
   vadState: AiModelState;
@@ -58,6 +60,7 @@ interface AiServiceContextValue extends AiServiceState {
   hearingChat: React.RefObject<Chat | undefined>;
   encoder: React.RefObject<Encoder | undefined>;
   crossEncoder: React.RefObject<CrossEncoder | undefined>;
+  decision: React.RefObject<Decision | undefined>;
   tts: React.RefObject<TextToSpeech | undefined>;
   stt: React.RefObject<SpeechToText | undefined>;
   vad: React.RefObject<VoiceActivityDetection | undefined>;
@@ -93,6 +96,10 @@ interface AiServiceContextValue extends AiServiceState {
     useGpu?: boolean;
     contextSize?: number;
   }) => Promise<void>;
+  createDecision: (opts?: {
+    useGpu?: boolean;
+    contextSize?: number;
+  }) => Promise<void>;
   createTts: (opts?: Partial<TextToSpeechOptions>) => Promise<void>;
   createStt: (opts?: Partial<SpeechToTextOptions>) => Promise<void>;
   createVad: (opts?: Partial<VoiceActivityDetectionOptions>) => Promise<void>;
@@ -112,6 +119,7 @@ const initialState: AiServiceState = {
   hearingChatState: AiModelState.NotLoaded,
   encoderState: AiModelState.NotLoaded,
   crossEncoderState: AiModelState.NotLoaded,
+  decisionState: AiModelState.NotLoaded,
   ttsState: AiModelState.NotLoaded,
   sttState: AiModelState.NotLoaded,
   vadState: AiModelState.NotLoaded,
@@ -130,6 +138,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
     hearingChat: false,
     encoder: false,
     crossEncoder: false,
+    decision: false,
     tts: false,
     stt: false,
     vad: false,
@@ -141,6 +150,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
   const hearingChatRef = useRef<Chat | undefined>(undefined);
   const encoderRef = useRef<Encoder | undefined>(undefined);
   const crossEncoderRef = useRef<CrossEncoder | undefined>(undefined);
+  const decisionRef = useRef<Decision | undefined>(undefined);
   const ttsRef = useRef<TextToSpeech | undefined>(undefined);
   const sttRef = useRef<SpeechToText | undefined>(undefined);
   const vadRef = useRef<VoiceActivityDetection | undefined>(undefined);
@@ -373,6 +383,36 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
         setState(s => ({ ...s, crossEncoderState: AiModelState.Error }));
       } finally {
         inFlight.current.crossEncoder = false;
+    inFlight.current.decision = false;
+      }
+    },
+    [],
+  );
+
+  // Decision
+  const createDecision = useCallback(
+    async (opts?: { useGpu?: boolean; contextSize?: number }) => {
+      if (inFlight.current.decision || decisionRef.current) {
+        return;
+      }
+
+      inFlight.current.decision = true;
+      setState(s => ({ ...s, decisionState: AiModelState.Loading }));
+
+      try {
+        const decision = await Decision.fromPath({
+          modelPath: 'hf://ggml-org/Laya-GGUF/Laya-Q8_0.gguf',
+          useGpu: opts?.useGpu ?? true,
+          contextSize: opts?.contextSize,
+        });
+
+        decisionRef.current = decision;
+        setState(s => ({ ...s, decisionState: AiModelState.Ready }));
+      } catch (error) {
+        devLog('AiService error', error);
+        setState(s => ({ ...s, decisionState: AiModelState.Error }));
+      } finally {
+        inFlight.current.decision = false;
       }
     },
     [],
@@ -472,6 +512,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
     hearingChatRef.current = undefined;
     encoderRef.current = undefined;
     crossEncoderRef.current = undefined;
+    decisionRef.current = undefined;
 
     // Reset in-flight flags so a subsequent createX() isn't silently skipped if
     // dispose ran while a load was pending.
@@ -497,6 +538,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       hearingChat: hearingChatRef,
       encoder: encoderRef,
       crossEncoder: crossEncoderRef,
+      decision: decisionRef,
       tts: ttsRef,
       stt: sttRef,
       vad: vadRef,
@@ -506,6 +548,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       createHearingChat,
       createEncoder,
       createCrossEncoder,
+      createDecision,
       createTts,
       createStt,
       createVad,
@@ -521,6 +564,7 @@ export const AiServiceProvider: React.FC<{ children: React.ReactNode }> = ({
       createHearingChat,
       createEncoder,
       createCrossEncoder,
+      createDecision,
       createTts,
       createStt,
       createVad,

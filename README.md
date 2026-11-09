@@ -18,6 +18,7 @@ This starter app demonstrates the capabilities of **[NobodyWho](https://github.c
 - **Speech to Text** — transcribe audio into text (STT)
 - **Text to Speech** — generate natural-sounding speech from text (TTS)
 - **Voice activity detection** - Detect speech in an audio stream to know when to start and stop listening
+- **Classify** - scores predefined answers instead of generating text with Laya decision model
 
 ## 1. Getting Started
 
