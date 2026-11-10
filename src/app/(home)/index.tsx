@@ -8,10 +8,12 @@ import {
 import {
   Dimensions,
   FlatList,
+  type FlatListInstance,
   Keyboard,
   Pressable,
   StyleSheet,
   View,
+  type ViewInstance,
 } from 'react-native';
 import { Message } from 'react-native-nobodywho';
 
@@ -73,8 +75,8 @@ function ChatScreen() {
     isTranscribing,
     toggle: toggleSpeechToText,
   } = useSttRecording(appendTranscript);
-  const flatListRef = useRef<FlatList>(null);
-  const containerRef = useRef<View>(null);
+  const flatListRef = useRef<FlatListInstance>(null);
+  const containerRef = useRef<ViewInstance>(null);
   const paddingBottom = useTabBarBottomPadding();
   const isKeyboardVisible = keyboardHeight > 0;
 

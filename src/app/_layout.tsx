@@ -1,7 +1,7 @@
 import '@/global.css';
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from 'expo-router/native-tabs';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';

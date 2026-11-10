@@ -231,7 +231,7 @@ export const useTtsPlayback = (): TtsPlayback => {
           file.delete();
         }
         file.create();
-        file.write(concatWavs(wavs));
+        await file.write(concatWavs(wavs));
 
         await setAudioModeAsync({ playsInSilentMode: true });
 
